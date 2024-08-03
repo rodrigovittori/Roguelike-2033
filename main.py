@@ -1,11 +1,10 @@
 #pgzero
 
 """
-Version actual: [M7.L1: Actividad #3]
+Version actual: [M7.L1: Actividad #5]
 
-Objetivo: Crear actores para nuestra paleta de terreno
-          Crear función que dibuje en pantalla el mapa, (segun los valores en la lista)
-          -> Extra: Agregar distintos modelos de mapa
+Objetivo: Crear actor para el personaje jugable/controlable
+          Agregarle atributos de salud y ataque y mostrarlos por pantalla
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -28,6 +27,13 @@ HEIGHT = celda.height * size_h #  Alto de la ventana (en píxeles)
 
 TITLE = "Rogue-like: Mazmorras" # Título de la ventana de juego
 FPS = 30 # Número de fotogramas por segundo
+
+# Personaje:
+
+personaje = Actor("stand")
+personaje.salud = 100
+# Nota: si quieren llevar control de la vida, pueden crear dos atributos: "salud_max" y "salud_actual"
+personaje.ataque = 5
 
 ################## MAPAS ##################
 
@@ -85,4 +91,7 @@ def dibujar_mapa(mapa):
 
 def draw():
   dibujar_mapa(mapa_actual)
-      
+  personaje.draw()
+
+  screen.draw.text(("PS: " + str(personaje.salud)), midright=((WIDTH - 15), 14), color = 'white', fontsize = 16)
+  screen.draw.text(("ATK: " + str(personaje.ataque)), midright=((WIDTH - 15), 36), color = 'white', fontsize = 16)
