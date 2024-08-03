@@ -1,10 +1,9 @@
 #pgzero
 
 """
-Version actual: [M7.L1: Actividad #5]
+Version actual: [M7.L1: Actividad #6]
 
-Objetivo: Crear actor para el personaje jugable/controlable
-          Agregarle atributos de salud y ataque y mostrarlos por pantalla
+Objetivo: Agregar control de movimiento para el personaje
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -95,3 +94,21 @@ def draw():
 
   screen.draw.text(("PS: " + str(personaje.salud)), midright=((WIDTH - 15), 14), color = 'white', fontsize = 16)
   screen.draw.text(("ATK: " + str(personaje.ataque)), midright=((WIDTH - 15), 36), color = 'white', fontsize = 16)
+
+def on_key_down(key):
+  
+  if ((keyboard.right or keyboard.d) and (personaje.x < (WIDTH - celda.width * 2))):
+    # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
+    personaje.x += celda.width
+    personaje.image = "stand" # xq stand mira a la dcha
+        
+  elif ((keyboard.left or keyboard.a) and (personaje.x > (celda.width * 2))):
+    personaje.x -= celda.width
+    personaje.image = "left" # xq mira a la izq
+        
+  elif ((keyboard.down or keyboard.s) and (personaje.y < HEIGHT - celda.height * 2)):
+    # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
+    personaje.y += celda.height
+    
+  elif ((keyboard.up or keyboard.w) and (personaje.y > (celda.height * 2))):
+        personaje.y -= celda.height
