@@ -1,9 +1,9 @@
 #pgzero
 
 """
-Version actual: [M7.L1: Actividad #6]
+Version actual: [M7.L1: Actividades Extra]
 
-Objetivo: Agregar control de movimiento para el personaje
+Objetivo: Agregar fila extra y reubicar datos en pantalla
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -18,8 +18,8 @@ piso =   Actor("floor")  # 1: Suelo liso (sin decoración)
 crack =  Actor("crack")  # 2: Suelo resquebrajado/quebradizo
 huesos = Actor("bones")  # 3: Suelo con una pilita de huesos
 
-size_w = 7 # Ancho del mapa en celdas
-size_h = 7 # Altura del mapa en celdas
+size_w = 9 # Ancho del mapa en celdas
+size_h = 10 # Altura del mapa en celdas
 
 WIDTH =  celda.width  * size_w # Ancho de la ventana (en píxeles)
 HEIGHT = celda.height * size_h #  Alto de la ventana (en píxeles)
@@ -36,21 +36,27 @@ personaje.ataque = 5
 
 ################## MAPAS ##################
 
-mapa = [ [0, 0, 0, 0, 0, 0, 0],
-         [0, 1, 2, 1, 3, 1, 0],
-         [0, 1, 1, 2, 1, 1, 0],
-         [0, 3, 2, 1, 1, 3, 0],
-         [0, 1, 1, 1, 3, 1, 0],
-         [0, 1, 3, 1, 1, 2, 0],
-         [0, 0, 0, 0, 0, 0, 0] ]
+mapa =   [[0, 0, 0, 0, 0, 0, 0, 0, 0], 
+          [0, 1, 1, 1, 1, 1, 1, 1, 0], 
+          [0, 1, 1, 2, 1, 3, 1, 1, 0], 
+          [0, 1, 1, 1, 2, 1, 1, 1, 0], 
+          [0, 1, 3, 2, 1, 1, 3, 1, 0], 
+          [0, 1, 1, 1, 1, 3, 1, 1, 0], 
+          [0, 1, 1, 3, 1, 1, 2, 1, 0], 
+          [0, 1, 1, 1, 1, 1, 1, 1, 0], 
+          [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [-1, -1, -1, -1, -1, -1, -1, -1, -1] ] # Fila extra para mostrar el texto
 
-mapa2 = [[0, 0, 0, 0, 0, 0, 0],
-         [0, 1, 1, 3, 1, 1, 0],
-         [0, 1, 3, 1, 3, 1, 0],
-         [0, 3, 1, 1, 1, 3, 0],
-         [0, 3, 1, 1, 1, 3, 0],
-         [0, 1, 3, 3, 3, 1, 0],
-         [0, 0, 0, 0, 0, 0, 0]]
+mapa2 = [ [0, 0, 0, 0, 0, 0, 0, 0, 0], 
+          [0, 1, 1, 1, 1, 1, 1, 1, 0], 
+          [0, 1, 1, 3, 1, 3, 1, 1, 0], 
+          [0, 1, 1, 3, 1, 3, 1, 1, 0], 
+          [0, 1, 1, 1, 1, 1, 1, 1, 0], 
+          [0, 3, 1, 1, 1, 1, 1, 3, 0], 
+          [0, 1, 3, 1, 1, 1, 3, 1, 0], 
+          [0, 1, 1, 3, 3, 3, 1, 1, 0], 
+          [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [-1, -1, -1, -1, -1, -1, -1, -1, -1] ] # Fila extra para mostrar el texto
 
 ###########################################
 
@@ -89,11 +95,12 @@ def dibujar_mapa(mapa):
         huesos.draw()
 
 def draw():
+  screen.fill("#2f3542") # rgb = (47, 53, 66)
   dibujar_mapa(mapa_actual)
   personaje.draw()
 
-  screen.draw.text(("PS: " + str(personaje.salud)), midright=((WIDTH - 15), 14), color = 'white', fontsize = 16)
-  screen.draw.text(("ATK: " + str(personaje.ataque)), midright=((WIDTH - 15), 36), color = 'white', fontsize = 16)
+  screen.draw.text(("Salud: " + str(personaje.salud)), midleft=(30, (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
+  screen.draw.text(("Ataque: " + str(personaje.ataque)), midright=((WIDTH - 30), (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
 
 def on_key_down(key):
   
@@ -106,8 +113,8 @@ def on_key_down(key):
     personaje.x -= celda.width
     personaje.image = "left" # xq mira a la izq
         
-  elif ((keyboard.down or keyboard.s) and (personaje.y < HEIGHT - celda.height * 2)):
-    # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
+  elif ((keyboard.down or keyboard.s) and (personaje.y < HEIGHT - celda.height * 3)):
+    # ¿Xq 3?: Una (a la que me voy a desplazar), otra (por la pared, que NO puedo atravesar) Y UNA TERCERA (para mostrar el texto)
     personaje.y += celda.height
     
   elif ((keyboard.up or keyboard.w) and (personaje.y > (celda.height * 2))):
