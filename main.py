@@ -2,9 +2,8 @@
 import random
 
 """
-Version actual: [M7.L2: Actividad #5: "Recolectando bonificaciones"]
-Objetivo: Agregar sus colisiones y efectos
-Próximo:  ...
+Version actual: [M7.L2: Actividad Extra #1 "¿Ganas o pierdes?"]
+Objetivo: Crear una función que verifique si la partida debe terminar
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -46,6 +45,9 @@ personaje.ataque = 5
 # Variables:
 CANT_ENEMIGOS_A_SPAWNEAR = 5
 colision = -2 # ¿XQ -2 como valor inicial?: porque es un valor que NO nos puede devolver collidelist.
+modo_actual = "juego"
+partida_finalizada = False # To-do: agregar variable para la habitación (no la partida)
+resultado_partida = "jugando" # valores: "jugando"/"victoria"/"derrota"
 
 # Listas:
 lista_enemigos = []
@@ -138,87 +140,115 @@ for enemigo_a_spawnear in range(CANT_ENEMIGOS_A_SPAWNEAR):
         nvo_enemigo.bonus = random.randint(0, 2) # 0: nada, 1: curacion, 2: +atk
         lista_enemigos.append(nvo_enemigo)
     
+def comprobar_fin_de_juego():
+    global modo_actual, partida_finalizada, resultado_partida
+    
+    if (personaje.salud <= 0): # El personaje fue derrotado
+        modo_actual = "transicion"
+        partida_finalizada = True
+        resultado_partida = "derrota"
 
+    elif ((lista_enemigos == []) and (personaje.salud > 0)): # NOTA: tener en cuenta si se modifica el juego (bonus, transciciones, etc)
+        modo_actual = "transicion"
+        partida_finalizada = True
+        resultado_partida = "victoria"
+        
 def draw():
-  screen.fill("#2f3542") # rgb = (47, 53, 66)
-  dibujar_mapa(mapa_actual)
-
-  for bonus in lista_bonus:
-      bonus.draw()
-
-  for enemigo in lista_enemigos:
-      enemigo.draw()
-
-  personaje.draw()
-
-  screen.draw.text(("Salud: " + str(personaje.salud)), midleft=(30, (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
-  screen.draw.text(("Ataque: " + str(personaje.ataque)), midright=((WIDTH - 30), (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
+    if (modo_actual == "juego"):
+      screen.fill("#2f3542") # rgb = (47, 53, 66)
+      dibujar_mapa(mapa_actual)
+    
+      for bonus in lista_bonus:
+          bonus.draw()
+    
+      for enemigo in lista_enemigos:
+          enemigo.draw()
+    
+      personaje.draw()
+    
+      screen.draw.text(("Salud: " + str(personaje.salud)), midleft=(30, (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
+      screen.draw.text(("Ataque: " + str(personaje.ataque)), midright=((WIDTH - 30), (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
+    
+    elif (modo_actual == "transicion"):
+        screen.fill("#2f3542")  # rgb = (47, 53, 66)
+        if (partida_finalizada):
+            if (resultado_partida == "victoria"):
+                screen.draw.text("¡Ganaste!", center=(WIDTH/2, HEIGHT/3), color = 'white', fontsize = 46)
+                screen.draw.text("Presiona [Espacio] para reiniciar", center=(WIDTH/2, HEIGHT/3 *2), color = 'white', fontsize = 24)
+            else:
+                screen.draw.text("¡Perdiste!", center=(WIDTH/2, HEIGHT/3), color = 'white', fontsize = 46)
+                screen.draw.text("Presiona [Espacio] para reiniciar", center=(WIDTH/2, HEIGHT/3 *2), color = 'white', fontsize = 24)
+        
 
 def on_key_down(key):
 
-  global colision
-
-  pos_previa = personaje.pos
-  
-  if ((keyboard.right or keyboard.d) and (personaje.x < (WIDTH - celda.width * 2))):
-    # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
-    personaje.x += celda.width
-    personaje.image = "stand" # xq stand mira a la dcha
-        
-  elif ((keyboard.left or keyboard.a) and (personaje.x > (celda.width * 2))):
-    personaje.x -= celda.width
-    personaje.image = "left" # xq mira a la izq
-        
-  elif ((keyboard.down or keyboard.s) and (personaje.y < HEIGHT - celda.height * 3)):
-    # ¿Xq 3?: Una (a la que me voy a desplazar), otra (por la pared, que NO puedo atravesar) Y UNA TERCERA (para mostrar el texto)
-    personaje.y += celda.height
-    
-  elif ((keyboard.up or keyboard.w) and (personaje.y > (celda.height * 2))):
-        personaje.y -= celda.height
-
-  # To-do: migrar a una funcion
-  # To-do: porgramar victoria (eliminar a todos los enemigos) y derrota (personaje.salud <= 0)
-
-
-  """ #################>>> COLISIONES CON ENEMIGOS <<<################# """
-    
-  colision = personaje.collidelist(lista_enemigos)
-
-  if (colision != -1):
-      # Si hubo colisión con un enemigo:
-      personaje.pos = pos_previa
-      
-      enemigo_atacado = lista_enemigos[colision]
-      enemigo_atacado.salud -= personaje.ataque
-      personaje.salud -= enemigo_atacado.ataque
-
-      if (enemigo_atacado.salud <= 0):
-
-          """ 1º Chequeamos si tiene bonus: """
-          if enemigo_atacado.bonus == 1:
-            # Spawnear curacion
-            nvo_bonus = Actor("heart", enemigo_atacado.pos)
-            lista_bonus.append(nvo_bonus)
-
-          elif enemigo_atacado.bonus == 2:
-            # Spawnear bonus de ataque
-            nvo_bonus = Actor("sword", enemigo_atacado.pos)
-            lista_bonus.append(nvo_bonus)
-
-          """ 2º Lo eliminamos """
-          # Método #1:
-          # lista_enemigos.pop(colision)
-          # Método #2:
-          lista_enemigos.remove(enemigo_atacado)
-          # To-do: agregar pila de huesitos en la casilla donde derrote al esqueleto
+  if (not partida_finalizada):
           
-  else: # Si NO hay colisión con enemigo:
-      """ >>> COLISIONES CON BONUS <<< """
-      for bonus in lista_bonus:
-          if personaje.colliderect(bonus):
-              # Si hubo colisión contra un bonus:
-              if (bonus.image == "heart"):
-                  personaje.salud += 15
-              elif (bonus.image == "sword"):
-                  personaje.ataque += 5
-              lista_bonus.remove(bonus)
+      global colision, resultado_partida
+    
+      pos_previa = personaje.pos
+      
+      if ((keyboard.right or keyboard.d) and (personaje.x < (WIDTH - celda.width * 2))):
+        # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
+        personaje.x += celda.width
+        personaje.image = "stand" # xq stand mira a la dcha
+            
+      elif ((keyboard.left or keyboard.a) and (personaje.x > (celda.width * 2))):
+        personaje.x -= celda.width
+        personaje.image = "left" # xq mira a la izq
+            
+      elif ((keyboard.down or keyboard.s) and (personaje.y < HEIGHT - celda.height * 3)):
+        # ¿Xq 3?: Una (a la que me voy a desplazar), otra (por la pared, que NO puedo atravesar) Y UNA TERCERA (para mostrar el texto)
+        personaje.y += celda.height
+        
+      elif ((keyboard.up or keyboard.w) and (personaje.y > (celda.height * 2))):
+            personaje.y -= celda.height
+    
+      # To-do: migrar a una funcion
+      # To-do: porgramar victoria (eliminar a todos los enemigos) y derrota (personaje.salud <= 0)
+    
+    
+      """ #################>>> COLISIONES CON ENEMIGOS <<<################# """
+        
+      colision = personaje.collidelist(lista_enemigos)
+    
+      if (colision != -1):
+          # Si hubo colisión con un enemigo:
+          personaje.pos = pos_previa
+          
+          enemigo_atacado = lista_enemigos[colision]
+          enemigo_atacado.salud -= personaje.ataque
+          personaje.salud -= enemigo_atacado.ataque
+    
+          if (enemigo_atacado.salud <= 0):
+    
+              """ 1º Chequeamos si tiene bonus: """
+              if enemigo_atacado.bonus == 1:
+                # Spawnear curacion
+                nvo_bonus = Actor("heart", enemigo_atacado.pos)
+                lista_bonus.append(nvo_bonus)
+    
+              elif enemigo_atacado.bonus == 2:
+                # Spawnear bonus de ataque
+                nvo_bonus = Actor("sword", enemigo_atacado.pos)
+                lista_bonus.append(nvo_bonus)
+    
+              """ 2º Lo eliminamos """
+              # Método #1:
+              # lista_enemigos.pop(colision)
+              # Método #2:
+              lista_enemigos.remove(enemigo_atacado)
+              # To-do: agregar pila de huesitos en la casilla donde derrote al esqueleto
+              
+      else: # Si NO hay colisión con enemigo:
+          """ >>> COLISIONES CON BONUS <<< """
+          for bonus in lista_bonus:
+              if personaje.colliderect(bonus):
+                  # Si hubo colisión contra un bonus:
+                  if (bonus.image == "heart"):
+                      personaje.salud += 15
+                  elif (bonus.image == "sword"):
+                      personaje.ataque += 5
+                  lista_bonus.remove(bonus)
+              
+  comprobar_fin_de_juego()
