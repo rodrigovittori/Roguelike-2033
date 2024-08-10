@@ -2,9 +2,8 @@
 import random
 
 """
-Version actual: [M7.L2: Actividad #1: "Generando Enemigos"]
-
-Objetivo: Agregar fila extra y reubicar datos en pantalla
+Version actual: [M7.L2: Actividad #2: "Método Collidelist"]
+Objetivo: Agregar colisiones y daño entre personajes
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -37,6 +36,7 @@ personaje.ataque = 5
 
 # Variables:
 CANT_ENEMIGOS_A_SPAWNEAR = 5
+colision = -2
 
 # Listas:
 lista_enemigos = []
@@ -140,6 +140,8 @@ def draw():
   screen.draw.text(("Ataque: " + str(personaje.ataque)), midright=((WIDTH - 30), (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
 
 def on_key_down(key):
+
+  global colision
   
   if ((keyboard.right or keyboard.d) and (personaje.x < (WIDTH - celda.width * 2))):
     # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
@@ -156,3 +158,17 @@ def on_key_down(key):
     
   elif ((keyboard.up or keyboard.w) and (personaje.y > (celda.height * 2))):
         personaje.y -= celda.height
+
+  # To-do: migrar a una funcion
+  # To-do: eliminar a los enemigos que no tengan más salud
+  # To-do: porgramar victoria (eliminar a todos los enemigos) y derrota (personaje.salud <= 0)
+  # To-do: evitar que el personaje pueda ingresar a una casilla ocupada
+
+  colision = personaje.collidelist(lista_enemigos)
+
+  if (colision != -1):
+      # Si hubo colisión con un enemigo:
+      enemigo_atacado = lista_enemigos[colision]
+      enemigo_atacado.salud -= personaje.ataque
+      personaje.salud -= enemigo_atacado.ataque
+    
