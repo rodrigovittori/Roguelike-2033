@@ -2,8 +2,8 @@
 import random
 
 """
-Version actual: [M7.L2: Actividad #2: "Método Collidelist"]
-Objetivo: Agregar colisiones y daño entre personajes
+Version actual: [M7.L2: Actividad #3: "Procesamiento de colisiones"]
+Objetivo: Eliminar enemigos cuya salud sea menor o igual a 0 puntos
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -36,7 +36,7 @@ personaje.ataque = 5
 
 # Variables:
 CANT_ENEMIGOS_A_SPAWNEAR = 5
-colision = -2
+colision = -2 # ¿XQ -2 como valor inicial?: porque es un valor que NO nos puede devolver collidelist.
 
 # Listas:
 lista_enemigos = []
@@ -142,6 +142,8 @@ def draw():
 def on_key_down(key):
 
   global colision
+
+    pos_previa = personaje.pos
   
   if ((keyboard.right or keyboard.d) and (personaje.x < (WIDTH - celda.width * 2))):
     # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
@@ -168,7 +170,17 @@ def on_key_down(key):
 
   if (colision != -1):
       # Si hubo colisión con un enemigo:
+      personaje.pos = pos_previa
+      
       enemigo_atacado = lista_enemigos[colision]
       enemigo_atacado.salud -= personaje.ataque
       personaje.salud -= enemigo_atacado.ataque
+
+      if (enemigo_atacado.salud <= 0):
+          # Método #1:
+          # lista_enemigos.pop(colision)
+          # Método #2:
+          lista_enemigos.remove(enemigo_atacado)
+          # To-do: agregar pila de huesitos en la casilla donde derrote al esqueleto
+
     
