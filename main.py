@@ -1,7 +1,8 @@
 #pgzero
+import random
 
 """
-Version actual: [M7.L1: Actividades Extra]
+Version actual: [M7.L2: Actividad #1: "Generando Enemigos"]
 
 Objetivo: Agregar fila extra y reubicar datos en pantalla
 
@@ -33,6 +34,12 @@ personaje = Actor("stand")
 personaje.salud = 100
 # Nota: si quieren llevar control de la vida, pueden crear dos atributos: "salud_max" y "salud_actual"
 personaje.ataque = 5
+
+# Variables:
+CANT_ENEMIGOS_A_SPAWNEAR = 5
+
+# Listas:
+lista_enemigos = []
 
 ################## MAPAS ##################
 
@@ -94,9 +101,39 @@ def dibujar_mapa(mapa):
         huesos.top = huesos.height * fila
         huesos.draw()
 
+"""  #####################
+    # FUNCIONES PROPIAS #
+   #####################   """
+
+# To-Do: migrar a función
+for enemigo_a_spawnear in range(CANT_ENEMIGOS_A_SPAWNEAR):
+    x = (random.randint(2, size_w - 2) * celda.width)
+    y = (random.randint(2, size_h - 3) * celda.height)
+    # To-Do: Agregar variable para determinar tipo de enemigo a spawnear
+    # To-do: agregar una posicion especifica para que spawnee el jugador
+    
+    nvo_enemigo = Actor("enemy", topleft = (x, y))
+
+    # Checkeamos que no se repitan las coordenadas
+    posicion_duplicada = False
+    for enemigo in lista_enemigos:
+        if (nvo_enemigo.pos == enemigo.pos): # Si la posición de nvo_enemigo es IGUAL a la de CUALQUIER enemigo en la lista,
+            posicion_duplicada = True        # Actualizamos la flag que indica que la posicion está duplicada
+    if (posicion_duplicada):
+        enemigo_a_spawnear -= 1              # restamos 1 al iterando (del for ppal)
+    else:
+        nvo_enemigo.salud = random.randint(10, 20)
+        nvo_enemigo.ataque = random.randint(5, 10)
+        lista_enemigos.append(nvo_enemigo)
+    
+
 def draw():
   screen.fill("#2f3542") # rgb = (47, 53, 66)
   dibujar_mapa(mapa_actual)
+
+  for enemigo in lista_enemigos:
+      enemigo.draw()
+
   personaje.draw()
 
   screen.draw.text(("Salud: " + str(personaje.salud)), midleft=(30, (HEIGHT - int(celda.height/2))), color = 'white', fontsize = 24)
