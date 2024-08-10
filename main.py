@@ -143,7 +143,7 @@ def on_key_down(key):
 
   global colision
 
-    pos_previa = personaje.pos
+  pos_previa = personaje.pos
   
   if ((keyboard.right or keyboard.d) and (personaje.x < (WIDTH - celda.width * 2))):
     # ¿Xq 2?: Una (a la que me voy a desplazar) y otra (por la pared, que NO puedo atravesar)
