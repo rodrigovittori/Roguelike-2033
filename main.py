@@ -2,8 +2,9 @@
 import random
 
 """
-Version actual: [M7.L2: Actividad #3: "Procesamiento de colisiones"]
-Objetivo: Eliminar enemigos cuya salud sea menor o igual a 0 puntos
+Version actual: [M7.L2: Actividad #4: "Aparición de las bonificaciones"]
+Objetivo: Agregar mecánicas de bonus, su spawn, mostrarlas por pantalla
+Próximo:  Agregar sus colisiones y efectos
 
 Kodland: https://kenney.nl/assets/roguelike-caves-dungeons
 packs de assets: https://kenney.nl/assets/series:Tiny?sort=update
@@ -40,6 +41,7 @@ colision = -2 # ¿XQ -2 como valor inicial?: porque es un valor que NO nos puede
 
 # Listas:
 lista_enemigos = []
+lista_bonus = []
 
 ################## MAPAS ##################
 
@@ -122,14 +124,19 @@ for enemigo_a_spawnear in range(CANT_ENEMIGOS_A_SPAWNEAR):
     if (posicion_duplicada):
         enemigo_a_spawnear -= 1              # restamos 1 al iterando (del for ppal)
     else:
+        # Si la posición del nvo_enemigo es válida,
         nvo_enemigo.salud = random.randint(10, 20)
         nvo_enemigo.ataque = random.randint(5, 10)
+        nvo_enemigo.bonus = random.randint(0, 2) # 0: nada, 1: curacion, 2: +atk
         lista_enemigos.append(nvo_enemigo)
     
 
 def draw():
   screen.fill("#2f3542") # rgb = (47, 53, 66)
   dibujar_mapa(mapa_actual)
+
+  for bonus in lista_bonus:
+      bonus.draw()
 
   for enemigo in lista_enemigos:
       enemigo.draw()
@@ -177,6 +184,19 @@ def on_key_down(key):
       personaje.salud -= enemigo_atacado.ataque
 
       if (enemigo_atacado.salud <= 0):
+
+          """ 1º Chequeamos si tiene bonus: """
+          if enemigo_atacado.bonus == 1:
+            # Spawnear curacion
+            nvo_bonus = Actor("heart", enemigo_atacado.pos)
+            lista_bonus.append(nvo_bonus)
+
+          elif enemigo_atacado.bonus == 2:
+            # Spawnear bonus de ataque
+            nvo_bonus = Actor("sword", enemigo_atacado.pos)
+            lista_bonus.append(nvo_bonus)
+
+          """ 2º Lo eliminamos """
           # Método #1:
           # lista_enemigos.pop(colision)
           # Método #2:
